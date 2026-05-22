@@ -5,17 +5,16 @@ RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql
 
+# Налаштовуємо Apache для роботи з Laravel (вказуємо папку public)
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
 # Копіюємо код
 COPY . /var/www/html
 
-# Вмикаємо Apache rewrite
+# Вмикаємо Apache rewrite (для роботи маршрутів Laravel)
 RUN a2enmod rewrite
 
-# Створюємо папки, якщо їх немає, і даємо права на все відразу
-RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chown -R www-data:www-data /var/www/html
-
-# Налаштовуємо DocumentRoot для Laravel
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+# Даємо права доступу
+RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
